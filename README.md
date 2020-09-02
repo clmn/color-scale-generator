@@ -1,1 +1,1 @@
-# design_and_code
+Figma plugin to generate color scale from a base color

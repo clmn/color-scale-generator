@@ -1,0 +1,42 @@
+<div class="main-container">
+<h2>Generate color scale</h2>
+<p>Steps: <select name="steps" id="count" >
+	<option value="6">6</option>	
+	<option value="8">8</option>	
+	<option value="10" selected>10</option>	
+	</select>
+</p>
+<p>Select an element to copy color from or enter a value here</p>
+<p>Color: #<input id="color" value="A21A50"></p>
+<button id="create">Create</button>
+<button id="cancel">Cancel</button>
+</div>
+<script>
+
+window.onmessage = async event => {
+  const message = event.data.pluginMessage
+  document.getElementById('color').value = message.fill
+}
+
+document.getElementById('create').onclick = () => {
+  const textbox = document.getElementById('count');
+  const colorbox = document.getElementById('color');
+  const count = parseInt(textbox.value, 10);
+  const color = colorbox.value;
+  parent.postMessage({ pluginMessage: { type: 'create-rectangles', count, color } }, '*')
+}
+
+document.getElementById('cancel').onclick = () => {
+  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+
+</script>
+<style type="text/css">
+	.main-container {
+		font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
+		font-size: 12px;
+	}
+	h2 {
+		font-size: 1.3em;
+	}
+</style>

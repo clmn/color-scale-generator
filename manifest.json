@@ -1,0 +1,7 @@
+{
+  "name": "Color scale generator",
+  "id": "876899098381850319",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html"
+}

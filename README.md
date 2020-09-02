@@ -1,1 +1,2 @@
-Figma plugin to generate color scale from a base color
+# Design system color scale generator
+After deciding on base palette, generate the rest with the plugin

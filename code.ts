@@ -1,24 +1,18 @@
 
 
 figma.showUI(__html__);
-figma.ui.resize(220,200);
+figma.ui.resize(220,180);
+tell_ui_color()
 
 figma.on('selectionchange', () => {
-  if (check_selected_corlor()) {
-    const fill = figma.currentPage.selection[0].fills[0].color
-
-    figma.ui.postMessage({
-      type: 'selectionChange',
-      fill: rgbToHex(fill.r, fill.g, fill.b)
-    })
-  }
+  tell_ui_color() 
 })
 
 
 figma.ui.onmessage = msg => {
 
   if (msg.type === 'create-rectangles') {
-    const nodes: SceneNode[] = [];
+    var nodes: SceneNode[] = [];
 
     var x0 = 0;
     var y0 = 0;
@@ -37,32 +31,36 @@ figma.ui.onmessage = msg => {
 
           base_color_rgb = figma.currentPage.selection[i].fills[0].color
           hsv = rgbToHsv(base_color_rgb.r,base_color_rgb.g,base_color_rgb.b);
-          renderScale(hsv,msg.count,x0,y0,figma.currentPage.selection[i].name)
+          nodes.push(renderScale(hsv,msg.count,x0,y0,figma.currentPage.selection[i].name,figma.currentPage.selection[i].parent))
           y0 += 60;
         }
       }
     } else if(base_color_rgb) {
-      renderScale(rgbToHsv(base_color_rgb.r,base_color_rgb.g,base_color_rgb.b),msg.count,x0,y0)
-    }  
+      nodes=renderScale(rgbToHsv(base_color_rgb.r,base_color_rgb.g,base_color_rgb.b),msg.count,x0,y0)
+    }
   }
-
-  // figma.closePlugin();
 };
+function tell_ui_color() {
+  if (check_selected_corlor()) {
+      const fill = figma.currentPage.selection[0].fills[0].color
+
+      figma.ui.postMessage({
+        type: 'selectionChange',
+        fill: rgbToHex(fill.r, fill.g, fill.b)
+      })
+    }
+}
 
 function check_selected_corlor(){
   return (figma.currentPage.selection && figma.currentPage.selection.length > 0 && figma.currentPage.selection[0].fills && figma.currentPage.selection[0].fills[0].color)
 }
 
-function renderScale(color_hsv, num_colors, x0=0, y0=0, name=""){
+function renderScale(color_hsv, num_colors, x0=0, y0=0, name="", scale_parent = undefined){
   var nodes: SceneNode[] = [];
-
   
   var steps_v = Math.round(num_colors*1.1/(1.1+color_hsv.s))
   var steps_s = num_colors-steps_v
   
-  
-  // first we go s = slope_s*v+b_s
-
   var params = {
     v_step: 0.8/steps_v,
     slope_s: Math.max(color_hsv.s/(color_hsv.v+1),0.2),
@@ -94,23 +92,22 @@ function renderScale(color_hsv, num_colors, x0=0, y0=0, name=""){
     x0+=60
   }
 
-  
-  var group = figma.group(nodes,nodes[0].parent)
+  if (scale_parent==undefined) scale_parent = nodes[0].parent
+  var group = figma.group(nodes,scale_parent)
   group.name = name+" color scale"
   return nodes;
 }
 
 function addRectangle(nodes, x0=0, y0=0, color, name="") {
   var rect = figma.createRectangle();
-    rect.x = x0;
-    rect.y = y0;
-    rect.resize(50,50)
+  rect.x = x0;
+  rect.y = y0;
+  rect.resize(50,50)
 
-    rect.fills = [{type: 'SOLID', color: {r:color.r, g:color.g, b:color.b}}];
-    rect.name = name;
-    figma.currentPage.appendChild(rect);
-    nodes.push(rect);
-
+  rect.fills = [{type: 'SOLID', color: {r:color.r, g:color.g, b:color.b}}];
+  rect.name = name;
+  figma.currentPage.appendChild(rect);
+  nodes.push(rect);
 }
 
 function calc_color(params,i,hsv,axis=0) {

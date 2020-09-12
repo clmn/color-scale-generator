@@ -36,8 +36,9 @@ figma.ui.onmessage = msg => {
         }
       }
     } else if(base_color_rgb) {
-      nodes=renderScale(rgbToHsv(base_color_rgb.r,base_color_rgb.g,base_color_rgb.b),msg.count,x0,y0)
+      nodes.push(renderScale(rgbToHsv(base_color_rgb.r,base_color_rgb.g,base_color_rgb.b),msg.count,x0,y0))
     }
+    figma.viewport.scrollAndZoomIntoView(nodes)
   }
 };
 function tell_ui_color() {
@@ -52,7 +53,7 @@ function tell_ui_color() {
 }
 
 function check_selected_corlor(){
-  return (figma.currentPage.selection && figma.currentPage.selection.length > 0 && figma.currentPage.selection[0].fills && figma.currentPage.selection[0].fills[0].color)
+  return (figma.currentPage.selection && figma.currentPage.selection.length > 0 && figma.currentPage.selection[0].fills && figma.currentPage.selection[0].fills.length && figma.currentPage.selection[0].fills[0].color)
 }
 
 function renderScale(color_hsv, num_colors, x0=0, y0=0, name="", scale_parent = undefined){
@@ -95,7 +96,7 @@ function renderScale(color_hsv, num_colors, x0=0, y0=0, name="", scale_parent = 
   if (scale_parent==undefined) scale_parent = nodes[0].parent
   var group = figma.group(nodes,scale_parent)
   group.name = name+" color scale"
-  return nodes;
+  return group;
 }
 
 function addRectangle(nodes, x0=0, y0=0, color, name="") {
